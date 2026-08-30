@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"os"
 
-	"acheron_server/internal/conf"
+	"achero_server/internal/conf"
 
 	"github.com/go-kratos/kratos/contrib/otel/v3/tracing"
 	"github.com/go-kratos/kratos/v3"

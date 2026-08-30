@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"acheron_server/internal/biz"
-	"acheron_server/internal/conf"
+	"achero_server/internal/biz"
+	"achero_server/internal/conf"
 
 	"golang.org/x/text/encoding/simplifiedchinese"
 )

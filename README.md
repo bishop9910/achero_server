@@ -20,12 +20,12 @@ HTTP），从一个本地音乐目录扫描曲目元数据，并对外提供**�
 # 1. 准备音乐目录（mp3/flac/m4a/ogg/opus/wav）
 mkdir -p ./music
 
-# 2. 直接运行（Windows 下编译产物为 bin/acheron_server.exe）
-go run ./cmd/acheron_server -conf ./configs
+# 2. 直接运行（Windows 下编译产物为 bin/achero_server.exe）
+go run ./cmd/achero_server -conf ./configs
 
 # 或编译后运行
 go build -o ./bin/ ./...
-./bin/acheron_server -conf ./configs
+./bin/achero_server -conf ./configs
 ```
 
 默认监听 `http://0.0.0.0:8080`。在 Achero 的「音乐服务器」插件中填入：
@@ -38,7 +38,7 @@ go build -o ./bin/ ./...
 ## 项目结构
 
 ```text
-cmd/acheron_server/    入口、Wire 依赖注入
+cmd/achero_server/    入口、Wire 依赖注入
 configs/               运行配置（config.yaml）
 internal/conf/         配置 proto（make config 生成）
 internal/server/       HTTP server 组装、CORS 中间件

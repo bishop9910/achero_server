@@ -15,9 +15,9 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"acheron_server/internal/biz"
-	"acheron_server/internal/conf"
-	"acheron_server/internal/data/audio"
+	"achero_server/internal/biz"
+	"achero_server/internal/conf"
+	"achero_server/internal/data/audio"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/go-kratos/kratos/v3/log"

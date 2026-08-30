@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"acheron_server/internal/biz"
-	"acheron_server/internal/conf"
+	"achero_server/internal/biz"
+	"achero_server/internal/conf"
 
 	"github.com/gorilla/mux"
 )

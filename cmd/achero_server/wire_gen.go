@@ -7,11 +7,11 @@
 package main
 
 import (
-	"acheron_server/internal/biz"
-	"acheron_server/internal/conf"
-	"acheron_server/internal/data"
-	"acheron_server/internal/server"
-	"acheron_server/internal/service"
+	"achero_server/internal/biz"
+	"achero_server/internal/conf"
+	"achero_server/internal/data"
+	"achero_server/internal/server"
+	"achero_server/internal/service"
 	"github.com/go-kratos/kratos/v3"
 	"log/slog"
 )

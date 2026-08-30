@@ -3,8 +3,8 @@ package server
 import (
 	"net/http"
 
-	"acheron_server/internal/conf"
-	"acheron_server/internal/service"
+	"achero_server/internal/conf"
+	"achero_server/internal/service"
 
 	"github.com/go-kratos/kratos/v3/middleware/recovery"
 	khttp "github.com/go-kratos/kratos/v3/transport/http"
