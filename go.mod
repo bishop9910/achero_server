@@ -1,4 +1,4 @@
-module acheron_server
+module achero_server
 
 go 1.25.7
 
