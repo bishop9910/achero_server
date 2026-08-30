@@ -1,0 +1,37 @@
+server:
+  http:
+    addr: 0.0.0.0:8080
+    # 0 disables the handler timeout. Keep it 0: audio streaming is long-lived
+    # and must not be cut off mid-song.
+    timeout: 0s
+music:
+  # Directory scanned recursively for audio files (mp3/flac/m4a/ogg/opus/wav).
+  music_dir: ${MUSIC_DIR:./music}
+  # Public base URL used to build stream/cover URLs, e.g. "http://192.168.1.10:8080".
+  # Empty derives it from the incoming request Host header.
+  base_url: ""
+  # Optional static bearer token for the JSON-RPC endpoint. Empty = no RPC auth.
+  token: ""
+  # Optional HMAC secret for signed stream/cover URLs. Empty = fall back to
+  # `token`; when both are empty the URLs are unsigned.
+  stream_secret: ""
+  # Signed URL lifetime in seconds.
+  token_ttl: 3600
+  # HTTP paths. Defaults shown.
+  rpc_path: /rpc
+  stream_path: /stream
+  cover_path: /cover
+  # Audio extensions to index (without dot). Empty uses the built-in list.
+  extensions:
+    - mp3
+    - flac
+    - m4a
+    - m4b
+    - ogg
+    - opus
+    - wav
+  # Rescan interval. 0 disables periodic rescanning.
+  rescan_interval: 0s
+  # Watch music_dir with fsnotify and rescan automatically when files are
+  # added/removed/renamed (hot reload). Set false to use polling only.
+  watch: true

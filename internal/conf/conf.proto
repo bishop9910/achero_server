@@ -1,0 +1,51 @@
+syntax = "proto3";
+package kratos.api;
+
+option go_package = "acheron_server/internal/conf;conf";
+
+import "google/protobuf/duration.proto";
+
+message Bootstrap {
+  Server server = 1;
+  Music music = 2;
+}
+
+message Server {
+  message HTTP {
+    string network = 1;
+    string addr = 2;
+    google.protobuf.Duration timeout = 3;
+  }
+  HTTP http = 1;
+}
+
+message Music {
+  // Directory scanned recursively for audio files. Empty disables the library
+  // (the server still answers music.ping).
+  string music_dir = 1;
+  // Public base URL used to build stream/cover URLs, e.g.
+  // "http://192.168.1.10:8080". Empty derives it from the incoming request.
+  string base_url = 2;
+  // Optional static bearer token for the JSON-RPC endpoint. Empty disables RPC
+  // authentication.
+  string token = 3;
+  // Optional HMAC secret used to sign stream/cover URLs. Empty falls back to
+  // `token`; when both are empty URLs are unsigned.
+  string stream_secret = 4;
+  // Signed URL lifetime in seconds. Defaults to 3600.
+  int64 token_ttl = 5;
+  // JSON-RPC path. Defaults to "/rpc".
+  string rpc_path = 6;
+  // Stream path prefix. Defaults to "/stream".
+  string stream_path = 7;
+  // Cover path prefix. Defaults to "/cover".
+  string cover_path = 8;
+  // Audio file extensions to index (without the leading dot). Empty uses a
+  // built-in list.
+  repeated string extensions = 9;
+  // Rescan interval. Zero disables periodic rescanning.
+  google.protobuf.Duration rescan_interval = 10;
+  // Watch music_dir with fsnotify and rescan automatically when files are
+  // added, removed or renamed. When false, only rescan_interval polling applies.
+  bool watch = 11;
+}

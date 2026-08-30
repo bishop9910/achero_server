@@ -1,0 +1,416 @@
+openapi: 3.1.0
+info:
+  title: Achero Music Server API
+  version: 1.0.0
+  description: |
+    一个 Kratos 驱动的音乐服务器，实现 Achero 内置插件「音乐服务器」的
+    JSON-RPC 2.0 协议。曲目元数据通过 `POST /rpc` 获取，音频流与封面通过
+    签名 URL 直接访问。
+
+    权威文档见 `docs/ACHERO_MUSIC_SERVER.md`。
+servers:
+  - url: http://localhost:8080
+    description: 本地默认地址
+
+tags:
+  - name: rpc
+    description: JSON-RPC 元数据接口
+  - name: media
+    description: 音频流与封面
+
+paths:
+  /rpc:
+    post:
+      tags: [rpc]
+      summary: JSON-RPC 分发入口
+      description: |
+        所有元数据调用统一走此端点。请求体为 JSON-RPC 2.0 对象，`method` 取值
+        `music.ping` / `music.list` / `music.listAlbums` / `music.listArtists` /
+        `music.listSongs` / `music.streamUrl`。若配置了 `music.token`，需携带
+        `Authorization: Bearer <token>` 请求头。
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RpcRequest'
+            examples:
+              ping:
+                summary: 健康检查
+                value:
+                  jsonrpc: "2.0"
+                  id: 0
+                  method: music.ping
+                  params: {}
+              list:
+                summary: 分页拉取全部曲目
+                value:
+                  jsonrpc: "2.0"
+                  id: 1
+                  method: music.list
+                  params:
+                    offset: 0
+                    limit: 200
+              listAlbums:
+                summary: 分页拉取专辑列表
+                value:
+                  jsonrpc: "2.0"
+                  id: 1
+                  method: music.listAlbums
+                  params:
+                    offset: 0
+                    limit: 200
+              listArtists:
+                summary: 分页拉取艺术家列表
+                value:
+                  jsonrpc: "2.0"
+                  id: 1
+                  method: music.listArtists
+                  params:
+                    offset: 0
+                    limit: 200
+              listSongs:
+                summary: 按专辑/艺术家拉取曲目
+                value:
+                  jsonrpc: "2.0"
+                  id: 1
+                  method: music.listSongs
+                  params:
+                    albumId: a1
+              streamUrl:
+                summary: 按 id 解析流地址
+                value:
+                  jsonrpc: "2.0"
+                  id: 2
+                  method: music.streamUrl
+                  params:
+                    id: 3a2c1f9e8b7d6c5a4b3a2c1f
+      responses:
+        '200':
+          description: JSON-RPC 响应（成功为 `result`，失败为 `error`）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RpcResponse'
+        '401':
+          description: 未授权（Bearer 令牌缺失或错误）
+        '405':
+          description: 方法不允许（仅接受 POST）
+
+  /stream/{id}:
+    get:
+      tags: [media]
+      summary: 流式播放音频
+      description: 返回音频字节流，支持 HTTP Range 请求（拖动进度条）。
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 曲目 id
+          schema:
+            type: string
+        - name: token
+          in: query
+          required: false
+          description: HMAC 签名令牌；配置密钥后必填
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 音频字节流
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: audio/mpeg
+            Accept-Ranges:
+              schema:
+                type: string
+                example: bytes
+          content:
+            audio/mpeg:
+              schema: { type: string, format: binary }
+            audio/flac:
+              schema: { type: string, format: binary }
+            audio/mp4:
+              schema: { type: string, format: binary }
+            audio/ogg:
+              schema: { type: string, format: binary }
+            audio/wav:
+              schema: { type: string, format: binary }
+        '206':
+          description: 部分内容（Range 请求）
+          headers:
+            Content-Range:
+              schema:
+                type: string
+          content:
+            audio/mpeg:
+              schema: { type: string, format: binary }
+        '403':
+          description: 令牌无效或过期
+        '404':
+          description: 曲目不存在
+    head:
+      tags: [media]
+      summary: 获取流响应头（不返回 body）
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: token
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 响应头与 GET 一致
+        '403':
+          description: 令牌无效或过期
+        '404':
+          description: 曲目不存在
+
+  /cover/{id}:
+    get:
+      tags: [media]
+      summary: 获取曲目封面
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 曲目 id
+          schema:
+            type: string
+        - name: token
+          in: query
+          required: false
+          description: HMAC 签名令牌；配置密钥后必填
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 封面图片
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                example: public, max-age=86400
+          content:
+            image/jpeg:
+              schema: { type: string, format: binary }
+            image/png:
+              schema: { type: string, format: binary }
+        '403':
+          description: 令牌无效或过期
+        '404':
+          description: 曲目不存在或没有内嵌封面
+    head:
+      tags: [media]
+      summary: 获取封面响应头（不返回 body）
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: token
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 响应头与 GET 一致
+        '403':
+          description: 令牌无效或过期
+        '404':
+          description: 曲目不存在或没有内嵌封面
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 可选。`music.token` 非空时 `/rpc` 必填。
+
+  schemas:
+    RpcId:
+      oneOf:
+        - type: number
+        - type: string
+        - type: 'null'
+
+    RpcRequest:
+      type: object
+      required: [jsonrpc, method]
+      properties:
+        jsonrpc:
+          type: string
+          const: "2.0"
+        id:
+          $ref: '#/components/schemas/RpcId'
+        method:
+          type: string
+          enum: [music.ping, music.list, music.listAlbums, music.listArtists, music.listSongs, music.streamUrl]
+        params:
+          oneOf:
+            - $ref: '#/components/schemas/ListParams'
+            - $ref: '#/components/schemas/ListSongsParams'
+            - $ref: '#/components/schemas/StreamUrlParams'
+            - type: object
+              additionalProperties: true
+
+    ListParams:
+      type: object
+      properties:
+        offset:
+          type: integer
+          default: 0
+        limit:
+          type: integer
+          default: 200
+
+    StreamUrlParams:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: string
+
+    ListSongsParams:
+      type: object
+      properties:
+        albumId:
+          type: string
+          description: 按专辑过滤（与 artistId 二选一）
+        artistId:
+          type: string
+          description: 按艺术家过滤（与 albumId 二选一）
+        offset:
+          type: integer
+          default: 0
+        limit:
+          type: integer
+          default: 200
+
+    Track:
+      type: object
+      required: [id, title]
+      properties:
+        id:
+          type: string
+          description: 曲目唯一 id
+        title:
+          type: string
+        artist:
+          type: string
+        album:
+          type: string
+        durationMs:
+          type: integer
+          format: int64
+        url:
+          type: string
+          description: 流地址（可带签名）
+        coverUrl:
+          type: string
+          description: 封面地址（有内嵌封面时返回）
+        lyrics:
+          type: string
+          description: 内联 LRC 歌词
+      example:
+        id: 3a2c1f9e8b7d6c5a4b3a2c1f
+        title: 海阔天空
+        artist: Beyond
+        album: 乐与怒
+        durationMs: 324000
+        url: http://localhost:8080/stream/3a2c1f9e8b7d6c5a4b3a2c1f?token=...
+        coverUrl: http://localhost:8080/cover/3a2c1f9e8b7d6c5a4b3a2c1f?token=...
+        lyrics: "[00:00.00]今天我\n[00:05.00]寒夜里看雪飘过"
+
+    Album:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        artist:
+          type: string
+        coverUrl:
+          type: string
+          description: 封面地址（指向代表曲目的封面）
+        songCount:
+          type: integer
+        year:
+          type: integer
+      example:
+        id: a1
+        name: 乐与怒
+        artist: Beyond
+        coverUrl: http://localhost:8080/cover/3a2c1f9e8b7d6c5a4b3a2c1f?token=...
+        songCount: 10
+        year: 1993
+
+    Artist:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        albumCount:
+          type: integer
+        songCount:
+          type: integer
+        coverUrl:
+          type: string
+          description: 封面地址（指向代表曲目的封面）
+      example:
+        id: ar1
+        name: Beyond
+        albumCount: 8
+        songCount: 96
+        coverUrl: http://localhost:8080/cover/3a2c1f9e8b7d6c5a4b3a2c1f?token=...
+
+    RpcErrorObject:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+
+    RpcResponse:
+      type: object
+      required: [jsonrpc, id]
+      oneOf:
+        - type: object
+          required: [result]
+          properties:
+            jsonrpc:
+              type: string
+              const: "2.0"
+            id:
+              $ref: '#/components/schemas/RpcId'
+            result:
+              type: object
+              additionalProperties: true
+        - type: object
+          required: [error]
+          properties:
+            jsonrpc:
+              type: string
+              const: "2.0"
+            id:
+              $ref: '#/components/schemas/RpcId'
+            error:
+              $ref: '#/components/schemas/RpcErrorObject'
