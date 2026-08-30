@@ -99,11 +99,11 @@ go test ./...   # 测试
 ## Docker
 
 ```bash
-docker build -t acheron-music-server .
+docker build -t achero-music-server .
 docker run --rm -p 8080:8080 \
   -v "$PWD/configs:/data/conf" \
   -v "$PWD/music:/music" \
-  acheron-music-server
+  achero-music-server
 ```
 
 ## 协议与部署
