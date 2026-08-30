@@ -21,7 +21,7 @@ openapi:
 .PHONY: build
 # build the server binary
 build:
-	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./cmd/acheron_server
+	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./cmd/achero_server
 
 .PHONY: generate
 # generate

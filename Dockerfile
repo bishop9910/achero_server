@@ -21,4 +21,4 @@ EXPOSE 8080
 VOLUME /data/conf
 VOLUME /music
 
-CMD ["./acheron_server", "-conf", "/data/conf"]
+CMD ["./achero_server", "-conf", "/data/conf"]

@@ -350,7 +350,7 @@ const file_conf_conf_proto_rawDesc = "" +
 	"extensions\x12B\n" +
 	"\x0frescan_interval\x18\n" +
 	" \x01(\v2\x19.google.protobuf.DurationR\x0erescanInterval\x12\x14\n" +
-	"\x05watch\x18\v \x01(\bR\x05watchB#Z!acheron_server/internal/conf;confb\x06proto3"
+	"\x05watch\x18\v \x01(\bR\x05watchB\"Z achero_server/internal/conf;confb\x06proto3"
 
 var (
 	file_conf_conf_proto_rawDescOnce sync.Once
